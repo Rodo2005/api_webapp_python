@@ -88,14 +88,22 @@ def reset():
         return jsonify({'trace': traceback.format_exc()})
 
 
-@app.route("/personas")
-def personas():
+@app.route("/personas/<name>")
+def personas(name):
     try:
-        # Alumno: Implemente
-        result = '''<h3>Alumno: Implementar la llamada
+        # Alumno: Implemente    
+        '''<h3>Alumno: Implementar la llamada
                     al HTML tabla.html
                     con render_template</h3>'''
-        return result
+        result = persona.report()
+        nombre = name.strip("{}")
+        for row in result:
+            Nombre = row['name']
+            if Nombre == nombre:
+                Edad = int(row['age'])
+                Nacionalidad = row['nationality']
+                break
+        return render_template('tabla.html', Nombre=Nombre, Edad=Edad, Nacionalidad=Nacionalidad)  
     except:
         return jsonify({'trace': traceback.format_exc()})
 
@@ -113,11 +121,27 @@ def personas_tabla():
 def comparativa():
     try:
         # Mostrar todos los registros en um gráfico
-        result = '''<h3>Implementar una función en persona.py
-                    nationality_review</h3>'''
-        result += '''<h3>Esa funcion debe devolver los datos que necesite
-                    para implementar el grafico a mostrar</h3>'''
-        return (result)
+        #result = '''<h3>Implementar una función en persona.py
+                    #nationality_review</h3>'''
+        #result += '''<h3>Esa funcion debe devolver los datos que necesite
+                    #para implementar el grafico a mostrar</h3>'''
+        nationality = []
+        count = []
+        fig = plt.figure()
+        fig.suptitle('Comparativa', fontsize=16)
+        ax = fig.add_subplot()
+        result = persona.nationality_review()
+        for row in result:
+            nacionalidad = row[0]
+            nationality.append(nacionalidad)
+            cantidad = row[1]
+            count.append(cantidad)
+        ax.pie(count, labels=nationality, autopct='%1.1f%%', shadow=True, startangle=343)
+        ax.axis('equal')
+        output = io.BytesIO()
+        FigureCanvas(fig).print_png(output)
+        plt.close(fig)
+        return Response(output.getvalue(), mimetype='image/png')
     except:
         return jsonify({'trace': traceback.format_exc()})
 
@@ -138,6 +162,10 @@ def registro():
             # age = ...
             # nationality = ...
             # persona.insert(name, int(age), nationality)
+            name = str(request.form['name'])
+            age = str(request.form['age'])
+            nationality = str(request.form['nationality'])
+            persona.insert(name, int(age), nationality)
             return Response(status=200)
         except:
             return jsonify({'trace': traceback.format_exc()})

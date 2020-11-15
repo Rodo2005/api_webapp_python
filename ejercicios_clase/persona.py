@@ -87,3 +87,14 @@ def report(limit=0, offset=0):
     # Cerrar la conexión con la base de datos
     conn.close()
     return query_results
+
+
+def nationality_review():
+    conn = sqlite3.connect('persona.db')
+    c = conn.cursor()
+    c.execute ('SELECT nationality, COUNT(nationality) AS cantidad FROM persona GROUP BY nationality;')
+    resultados = c.fetchall()
+    conn.close()
+    return (resultados)
+
+
